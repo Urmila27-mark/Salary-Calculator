@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Calculator</title>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script> 
+    <style>
+        :root {
+            --bg-light: linear-gradient(135deg, #00c6ff, #0072ff, #a84cf5, #ff9a8b);
+            --bg-dark: #121212;
+            --text-light: #333;
+            --text-dark: #f1f1f1;
+            --container-light: white;
+            --container-dark: #1e1e1e;
+            --border-light: #ffb347;
+            --border-dark: #ff6a00;
+        }
+
+        html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-light);
+    color: var(--text-light);
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    height: auto;
+}
+
+
+        .dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-height: 90vh;
+            margin: 20px;
+            max-width: 450px;
+            padding: 25px;
+            background: var(--container-light);
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            transition: 0.3s;
+            border: 3px solid var(--border-light);
+            
+        }
+
+        .dark-mode .container {
+            background: var(--container-dark);
+            border-color: var(--border-dark);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(to right, #ffcc00, #ff6666);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #quote {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ff5733;
+        }
+
+        input {
+            width: 100%;
+            padding: 5px;
+            border-radius: 5px;
+            border: 2px solid #6a11cb;
+            background: #fff3e0;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 7px;
+        }
+
+        .dark-mode input {
+            background: #333;
+            color: #fff;
+        }
+
+        button {
+            background: linear-gradient(90deg, #ff6a00, #ee0979);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #ee0979, #ff6a00);
+        }
+
+        .toggle-button {
+            margin-top: 10px;
+            background: #333;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .dark-mode .toggle-button {
+            background: white;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="toggle-button" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+        <p id="quote"></p>
+        <h1>💰 Salary Calculator 💼</h1>
+        <form id="salaryForm">
+            <label> Employee Name: <input type="text" id="employeeName" required></label>
+            <label> Base Salary ($): <input type="number" id="baseSalary" required></label>
+            <label> Bonus ($): <input type="number" id="bonus" value="0"></label>
+            <label> DA (%): <input type="number" id="da" value="0"></label>
+            <label> Overtime Pay ($): <input type="number" id="overtime" value="0"></label>
+            <label> Tax Deduction (%): <input type="number" id="tax" value="0"></label>
+            <button type="button" onclick="calculateSalary()">💲 Calculate Salary</button>
+        </form>
+        <h2 id="employeeOutput"></h2>
+        <h2>Total Salary: <span id="totalSalary">$0.00</span></h2>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            getQuoteBasedOnTimeZone();
+            if (localStorage.getItem("dark-mode") === "enabled") {
+                document.body.classList.add("dark-mode");
+            }
+        });
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+            if (document.body.classList.contains("dark-mode")) {
+                localStorage.setItem("dark-mode", "enabled");
+            } else {
+                localStorage.setItem("dark-mode", "disabled");
+            }
+        }
+
+        const quotes = {
+            "Sunday": "Relax and recharge! 🌞 Tomorrow is a new start.",
+            "Monday": "New week, new goals! 💪 Stay motivated.",
+            "Tuesday": "Keep pushing forward! 🚀 You’re doing great.",
+            "Wednesday": "You're halfway there! 🔥 Keep going!",
+            "Thursday": "Almost there! 🌟 Stay focused.",
+            "Friday": "Finish strong! 🎉 The weekend is near.",
+            "Saturday": "Enjoy the weekend! 🌸 Reflect and recharge."
+        };
+
+        function calculateSalary() {
+            let employeeName = document.getElementById("employeeName").value;
+            let baseSalary = parseFloat(document.getElementById("baseSalary").value) || 0;
+            let bonus = parseFloat(document.getElementById("bonus").value) || 0;
+            let da = parseFloat(document.getElementById("da").value) || 0;
+            let overtime = parseFloat(document.getElementById("overtime").value) || 0;
+            let tax = parseFloat(document.getElementById("tax").value) || 0;
+
+            let daAmount = (da / 100) * baseSalary;
+            let grossSalary = baseSalary + bonus + daAmount + overtime;
+            let taxAmount = (tax / 100) * grossSalary;
+            let totalSalary = grossSalary - taxAmount;
+
+            document.getElementById("employeeOutput").innerText = `Employee: ${employeeName}`;
+            document.getElementById("totalSalary").innerText = `$${totalSalary.toFixed(2)}`;
+        }
+
+        function getQuoteBasedOnTimeZone() {
+            const today = new Date();
+            const day = today.toLocaleDateString('en-US', { weekday: 'long' });
+            document.getElementById('quote').innerText = quotes[day] || "Stay Positive! ✨";
+        }
+    </script>
+</body>
+</html>
