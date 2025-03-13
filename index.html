@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Calculator</title>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-light: linear-gradient(135deg, #e0eafc, #cfdef3);
+            --bg-dark: #181818;
+            --text-light: #222;
+            --text-dark: #f1f1f1;
+            --container-light: #ffffff;
+            --container-dark: #242424;
+            --border-light: #0077b6;
+            --border-dark: #00a8e8;
+            --btn-primary: #0077b6;
+            --btn-hover: #005f89;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        html, body {
+            background: var(--bg-light);
+            color: var(--text-light);
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: all 0.3s ease-in-out;
+            padding: 20px;
+        }
+
+        .dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            background: var(--container-light);
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 2px solid var(--border-light);
+            text-align: left;
+            transition: 0.3s;
+        }
+
+        .dark-mode .container {
+            background: var(--container-dark);
+            border-color: var(--border-dark);
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            text-align: center;
+            color: var(--border-light);
+        }
+
+        #quote {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: var(--btn-hover);
+            text-align: center;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin: 8px 0 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .dark-mode input {
+            background: #333;
+            color: #fff;
+            border-color: #555;
+        }
+
+        input:focus {
+            border-color: var(--border-light);
+            box-shadow: 0 0 5px rgba(0, 119, 182, 0.3);
+        }
+
+        button {
+            background: var(--btn-primary);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background: var(--btn-hover);
+        }
+
+        .toggle-button {
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            background: #555;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .dark-mode .toggle-button {
+            background: #ddd;
+            color: black;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .dark-mode .result {
+            color: var(--btn-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="toggle-button" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+        <p id="quote"></p>
+        <h1>💰 Salary Calculator 💲</h1>
+        <form id="salaryForm">
+            <label> Employee Name: <input type="text" id="employeeName" pattern="[A-Za-z\s]+" title="Only alphabets and spaces are allowed" required></label>
+            <label> Base Salary ($): <input type="number" id="baseSalary" required></label>
+            <label> Bonus ($): <input type="number" id="bonus" ></label>
+            <label> DA (%): <input type="number" id="da" ></label>
+            <label> Overtime Pay ($): <input type="number" id="overtime" ></label>
+            <label> Tax Deduction (%): <input type="number" id="tax" ></label>
+            <button type="button" onclick="calculateSalary()">💲 Calculate Salary</button>
+        </form>
+        <div class="result">
+            <h2 id="employeeOutput"></h2>
+            <h2>Total Salary: <span id="totalSalary">$0.00</span></h2>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            getQuoteBasedOnTimeZone();
+            if (localStorage.getItem("dark-mode") === "enabled") {
+                document.body.classList.add("dark-mode");
+            }
+        });
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+            localStorage.setItem("dark-mode", document.body.classList.contains("dark-mode") ? "enabled" : "disabled");
+        }
+
+        const quotes = {
+            "Sunday": "Relax and recharge! 🌞 Tomorrow is a new start.",
+            "Monday": "New week, new goals! 💪 Stay motivated.",
+            "Tuesday": "Keep pushing forward! 🚀 You’re doing great.",
+            "Wednesday": "You're halfway there! 🔥 Keep going!",
+            "Thursday": "Almost there! ⭐ Stay focused.",
+            "Friday": "Finish strong! 🎉 The weekend is near.",
+            "Saturday": "Enjoy the weekend! 🌸 Reflect and recharge."
+        };
+
+        function calculateSalary() {
+            let employeeName = document.getElementById("employeeName").value.trim();
+            let baseSalary = parseFloat(document.getElementById("baseSalary").value) || 0;
+            let bonus = parseFloat(document.getElementById("bonus").value) || 0;
+            let da = parseFloat(document.getElementById("da").value) || 0;
+            let overtime = parseFloat(document.getElementById("overtime").value) || 0;
+            let tax = parseFloat(document.getElementById("tax").value) || 0;
+
+            let daAmount = (da / 100) * baseSalary;
+            let grossSalary = baseSalary + bonus + daAmount + overtime;
+            let totalSalary = grossSalary - (tax / 100) * grossSalary;
+
+            document.getElementById("employeeOutput").innerText = `Employee: ${employeeName}`;
+            document.getElementById("totalSalary").innerText = `$${totalSalary.toFixed(2)}`;
+        }
+
+        function getQuoteBasedOnTimeZone() {
+            const day = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+            document.getElementById('quote').innerText = quotes[day] || "Stay Positive! ✨";
+        }
+    </script>
+</body>
+</html>
